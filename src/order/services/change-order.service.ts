@@ -5,18 +5,16 @@ import { OrderRepository } from '../dal/order.repository';
 import { ChangeOrderDto } from '../controllers/dtos/change-order.dto';
 import { ChangeAmountFilter } from '../filters/change-amount-filter';
 
-export class ChangeOrderPipeline extends Pipeline<Order> {
-  constructor(private readonly orderRepository: OrderRepository) {
-    super();
-  }
+export class ChangeOrderService {
+  constructor(private readonly orderRepository: OrderRepository) {}
   async execute(dto: ChangeOrderDto): Promise<Order> {
-    let order = this.orderRepository.getById(dto.orderId);
+    const order = this.orderRepository.getById(dto.orderId);
 
-    this.addFilter(new ChangeAmountFilter(dto.newTotalAmount));
-    this.addFilter(new DiscountFilter());
+    new Pipeline([
+      new ChangeAmountFilter(dto.newTotalAmount),
+      new DiscountFilter(),
+    ]).process(order);
 
-    order = this.process(order);
-
-    return order;
+    return this.orderRepository.save(order);
   }
 }

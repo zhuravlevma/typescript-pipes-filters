@@ -1,7 +1,7 @@
 import { Filter } from './filter';
 
 export class Pipeline<T> {
-  filters: Filter<T>[] = [];
+  constructor(private readonly filters: Filter<T>[]) {}
 
   addFilter(filter: Filter<T>) {
     this.filters.push(filter);
