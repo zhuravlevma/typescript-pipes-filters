@@ -1,32 +1,13 @@
+import { Pipeline } from 'src/__lib__/pipeline';
 import { CreateOrderDto } from '../controllers/dtos/create-order.dto';
 import { Order } from '../dal/orm-models/order.orm-model';
 import { CreateOrderValidationFilter } from '../filters/create-order-validation.filter';
 import { DiscountFilter } from '../filters/discount.filter';
 
-export class Pipeline<T> {
-  filters: Array<(data: T) => T> = [];
-
-  addFilter(filter: (data: T) => T) {
-    this.filters.push(filter);
-  }
-
-  process(data: T): T {
-    let currentData = data;
-    for (const filter of this.filters) {
-      currentData = filter(currentData);
-    }
-    return currentData;
-  }
-}
-
 export class CreateOrderPipeline extends Pipeline<Order> {
-  constructor() {
-    super();
-  }
-
   async execute(dto: CreateOrderDto): Promise<Order> {
-    this.addFilter(new CreateOrderValidationFilter().process);
-    this.addFilter(new DiscountFilter().process);
+    this.addFilter(new CreateOrderValidationFilter());
+    this.addFilter(new DiscountFilter());
 
     let order = new Order(
       dto.orderId,
@@ -35,11 +16,9 @@ export class CreateOrderPipeline extends Pipeline<Order> {
       dto.totalAmount,
       dto.status,
     );
-    for (const filter of this.filters) {
-      order = filter(order); // Каждый фильтр работает с сущностью
-    }
 
-    // Возвращаем результат в DTO
+    order = this.process(order);
+
     return order;
   }
 }
