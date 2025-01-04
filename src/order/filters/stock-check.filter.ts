@@ -1,7 +1,7 @@
 import { Filter } from 'src/__lib__/filter';
 import { Order } from '../dal/orm-models/order.orm-model';
 
-export class StockCheckFilter extends Filter<Order> {
+export class StockCheckFilter implements Filter<Order> {
   process(order: Order): Order {
     order.items.forEach((item) => {
       if (item.quantity > 10) {

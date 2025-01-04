@@ -1,3 +1,3 @@
-export abstract class Filter<T> {
-  abstract process(input: T): T;
+export interface Filter<T> {
+  process(input: T): T;
 }
